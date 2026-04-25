@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineScope</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a24;
+      --border: #2a2a3a;
+      --gold: #d4a843;
+      --gold-dim: #8a6b26;
+      --red: #c0392b;
+      --text: #e8e4dc;
+      --text-dim: #7a7488;
+      --accent: #4a9eff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 3rem;
+      height: 70px;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(212,168,67,0.4);
+      position: relative;
+    }
+    .logo span { color: var(--text-dim); font-size: 0.9rem; letter-spacing: 0.3em; font-family: 'DM Sans', sans-serif; margin-left: 0.4rem; vertical-align: middle; }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.4rem 1rem 0.4rem 0.5rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .user-chip:hover { border-color: var(--gold-dim); }
+    .avatar {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--gold), var(--red));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 500;
+    }
+
+    nav {
+      display: flex;
+      gap: 0.25rem;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+    }
+    nav button:hover { color: var(--text); background: var(--surface2); }
+    nav button.active { color: var(--gold); background: rgba(212,168,67,0.08); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      padding: 5rem 3rem 4rem;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 70% at 70% 50%, rgba(212,168,67,0.06) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 60% at 20% 80%, rgba(192,57,43,0.05) 0%, transparent 60%);
+    }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      line-height: 0.92;
+      letter-spacing: 0.04em;
+      position: relative;
+    }
+    .hero h1 em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--gold);
+      font-size: 0.85em;
+    }
+    .hero p {
+      margin-top: 1.5rem;
+      color: var(--text-dim);
+      font-size: 1rem;
+      max-width: 420px;
+      line-height: 1.7;
+      position: relative;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      margin-top: 2.5rem;
+      position: relative;
+    }
+    .stat { text-align: left; }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-label { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.2rem; }
+
+    /* ── MAIN LAYOUT ── */
+    .container { padding: 0 3rem 4rem; }
+
+    /* ── TABS / SECTIONS ── */
+    .section { display: none; animation: fadeUp 0.35s ease; }
+    .section.active { display: block; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.9rem;
+      letter-spacing: 0.06em;
+      color: var(--text);
+    }
+    .section-count {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.2rem 0.7rem;
+    }
+
+    /* ── FILTERS ── */
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+    }
+    .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .filter-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 500; }
+
+    /* ── MOVIE GRID ── */
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .movie-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s;
+      cursor: default;
+    }
+    .movie-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .movie-card:hover { border-color: #3a3a4a; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+    .movie-card:hover::before { opacity: 1; }
+
+    .card-genre {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 0.6rem;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+    .card-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+    }
+    .card-stars {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 0.8rem;
+    }
+    .star { color: var(--border); font-size: 0.9rem; }
+    .star.filled { color: var(--gold); }
+
+    .card-remark {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.5;
+      border-left: 2px solid var(--border);
+      padding-left: 0.7rem;
+      margin-bottom: 0.8rem;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.6rem;
+    }
+    .card-user {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+    .card-user span { color: var(--text); font-weight: 500; }
+
+    .watchlist-badge {
+      font-size: 0.68rem;
+      background: rgba(212,168,67,0.1);
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    /* ── ADD MOVIE FORM ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      max-width: 680px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    label span { color: var(--red); }
+
+    input, select, textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.7rem 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold-dim); }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: var(--surface2); }
+
+    /* ── STAR RATING INPUT ── */
+    .star-input { display: flex; gap: 6px; margin-top: 0.2rem; }
+    .star-input label {
+      font-size: 1.5rem;
+      color: var(--border);
+      cursor: pointer;
+      transition: color 0.15s;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .star-input input { display: none; }
+    .star-input label:hover,
+    .star-input label:hover ~ label,
+    .star-input input:checked ~ label { color: var(--gold); }
+    .star-input { flex-direction: row-reverse; }
+    .star-input label:hover,
+    .star-input label:hover ~ label { color: var(--gold); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: #000;
+    }
+    .btn-primary:hover { background: #e0b84d; box-shadow: 0 4px 20px rgba(212,168,67,0.3); }
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .btn-ghost:hover { border-color: var(--gold-dim); color: var(--text); }
+
+    .form-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+      grid-column: 1 / -1;
+    }
+
+    /* ── RECOMMENDATION ── */
+    .rec-genres {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .genre-tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .genre-tile:hover, .genre-tile.selected {
+      border-color: var(--gold);
+      background: rgba(212,168,67,0.05);
+    }
+    .genre-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .genre-name { font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
+    .genre-tile.selected .genre-name { color: var(--gold); }
+
+    /* ── WATCHLIST ── */
+    .watchlist-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s;
+    }
+    .watchlist-item:hover { border-color: #3a3a4a; }
+    .wl-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--text-dim); min-width: 28px; }
+    .wl-title { font-size: 0.95rem; flex: 1; }
+    .wl-remove { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1rem; transition: color 0.2s; padding: 0.2rem; }
+    .wl-remove:hover { color: var(--red); }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-dim);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+    .empty p { font-size: 0.9rem; line-height: 1.7; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface2);
+      border: 1px solid var(--gold-dim);
+      color: var(--text);
+      padding: 0.85rem 1.4rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      z-index: 9999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 30px rgba(212,168,67,0.3);
+      margin-bottom: 0.25rem;
+    }
+    .login-tagline {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+    .login-box input {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .login-box .btn { width: 100%; justify-content: center; }
+    .login-box .btn { margin-top: 0.25rem; }
+    #app { display: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      header { padding: 0 1.25rem; }
+      .hero { padding: 3rem 1.25rem 2.5rem; }
+      .container { padding: 0 1.25rem 3rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">CINESCOPE</div>
+    <div class="login-tagline">Your personal movie universe</div>
+    <input type="text" id="username-input" placeholder="Enter your username" autocomplete="off"/>
+    <button class="btn btn-primary" onclick="doLogin()" style="width:100%;justify-content:center;margin-top:0.25rem;">
+      Enter &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+
+  <header>
+    <div class="logo">CINESCOPE <span>/ Beta</span></div>
+    <nav>
+      <button class="active" onclick="showSection('all', this)">All Movies</button>
+      <button onclick="showSection('mine', this)">My Movies</button>
+      <button onclick="showSection('watchlist', this)">Watchlist</button>
+      <button onclick="showSection('recommend', this)">Recommend</button>
+      <button onclick="showSection('add', this)">+ Add</button>
+    </nav>
+    <div class="user-chip" onclick="logout()">
+      <div class="avatar" id="avatar-initials">?</div>
+      <span id="header-user">user</span>
+      <span style="color:var(--text-dim)">↩</span>
+    </div>
+  </header>
+
+  <!-- hero -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <h1>Track. Discover.<br><em>Remember.</em></h1>
+    <p>Your curated film diary. Add movies, build watchlists, and get genre-based recommendations.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Films Logged</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-mine">0</div>
+        <div class="stat-label">Added by You</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-wl">0</div>
+        <div class="stat-label">On Watchlist</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ALL MOVIES -->
+    <div class="section active" id="s-all">
+      <div class="section-header">
+        <div class="section-title">All Movies</div>
+        <div class="section-count" id="all-count">0</div>
+      </div>
+      <div class="filters" id="genre-filters">
+        <button class="filter-btn active" onclick="filterMovies('all', this)">All</button>
+        <button class="filter-btn" onclick="filterMovies('Action', this)">Action</button>
+        <button class="filter-btn" onclick="filterMovies('Comedy', this)">Comedy</button>
+        <button class="filter-btn" onclick="filterMovies('Drama', this)">Drama</button>
+        <button class="filter-btn" onclick="filterMovies('Horror', this)">Horror</button>
+        <button class="filter-btn" onclick="filterMovies('Sci-Fi', this)">Sci-Fi</button>
+        <button class="filter-btn" onclick="filterMovies('Other', this)">Other</button>
+      </div>
+      <div class="movies-grid" id="all-movies-grid"></div>
+    </div>
+
+    <!-- MY MOVIES -->
+    <div class="section" id="s-mine">
+      <div class="section-header">
+        <div class="section-title">My Movies</div>
+        <div class="section-count" id="mine-count">0</div>
+      </div>
+      <div class="movies-grid" id="my-movies-grid"></div>
+    </div>
+
+    <!-- WATCHLIST -->
+    <div class="section" id="s-watchlist">
+      <div class="section-header">
+        <div class="section-title">Watchlist</div>
+        <div class="section-count" id="wl-count">0</div>
+      </div>
+      <div id="watchlist-container"></div>
+    </div>
+
+    <!-- RECOMMEND -->
+    <div class="section" id="s-recommend">
+      <div class="section-header">
+        <div class="section-title">Recommendations</div>
+      </div>
+      <div class="rec-genres">
+        <div class="genre-tile" onclick="getRecommendations('Action', this)">
+          <div class="genre-icon">⚡</div>
+          <div class="genre-name">Action</div>
+        </div>
+        <div class="genre-tile" onclick="getRecommendations('Comedy', this)">
+          <div class="genre-icon">😄</div>
+          <div class="genre-name">Comedy</div>
+        </div>
+        <div class="genre-tile" onclick="getRecommendations('Drama', this)">
+          <div class="genre-icon">🎭</div>
+          <div class="genre-name">Drama</div>
+        </div>
+        <div class="genre-tile" onclick="getRecommendations('Horror', this)">
+          <div class="genre-icon">👻</div>
+          <div class="genre-name">Horror</div>
+        </div>
+        <div class="genre-tile" onclick="getRecommendations('Sci-Fi', this)">
+          <div class="genre-icon">🚀</div>
+          <div class="genre-name">Sci-Fi</div>
+        </div>
+        <div class="genre-tile" onclick="getRecommendations('Other', this)">
+          <div class="genre-icon">🎬</div>
+          <div class="genre-name">Other</div>
+        </div>
+      </div>
+      <div id="rec-results"></div>
+    </div>
+
+    <!-- ADD MOVIE -->
+    <div class="section" id="s-add">
+      <div class="section-header">
+        <div class="section-title">Add Movie</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Movie Name <span>*</span></label>
+          <input type="text" id="f-name" placeholder="e.g. Interstellar"/>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="text" id="f-year" placeholder="e.g. 2014"/>
+        </div>
+        <div class="form-group">
+          <label>Language</label>
+          <input type="text" id="f-lang" placeholder="e.g. English"/>
+        </div>
+        <div class="form-group">
+          <label>Genre</label>
+          <select id="f-genre">
+            <option value="Action">Action</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Drama">Drama</option>
+            <option value="Horror">Horror</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Rating (1–5)</label>
+          <div class="star-input" id="star-input">
+            <input type="radio" name="rating" id="s5" value="5"/><label for="s5">★</label>
+            <input type="radio" name="rating" id="s4" value="4"/><label for="s4">★</label>
+            <input type="radio" name="rating" id="s3" value="3" checked/><label for="s3">★</label>
+            <input type="radio" name="rating" id="s2" value="2"/><label for="s2">★</label>
+            <input type="radio" name="rating" id="s1" value="1"/><label for="s1">★</label>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Remark / Review</label>
+          <textarea id="f-remark" placeholder="Your thoughts on this film…"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addMovie()">Add Movie</button>
+          <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── STATE ──
+  let currentUser = '';
+  let movies = [];
+  let watchlist = [];
+  let idCounter = 1;
+
+  const GENRE_ICONS = { Action:'⚡', Comedy:'😄', Drama:'🎭', Horror:'👻', 'Sci-Fi':'🚀', Other:'🎬' };
+
+  // ── SEED DATA ──
+  function seed() {
+    const data = [
+      { name:'Inception', year:'2010', language:'English', remark:'Mind-bending masterpiece.', rating:5, genre:'Sci-Fi', addedBy:'admin' },
+      { name:'The Dark Knight', year:'2008', language:'English', remark:'Ledger is unforgettable.', rating:5, genre:'Action', addedBy:'admin' },
+      { name:'Parasite', year:'2019', language:'Korean', remark:'A staggering piece of cinema.', rating:5, genre:'Drama', addedBy:'admin' },
+      { name:'Get Out', year:'2017', language:'English', remark:'Tension you can feel.', rating:4, genre:'Horror', addedBy:'admin' },
+      { name:'Superbad', year:'2007', language:'English', remark:'Peak comfort comedy.', rating:4, genre:'Comedy', addedBy:'admin' },
+    ];
+    movies = data.map(m => ({ ...m, id: idCounter++ }));
+    save();
+  }
+
+  // ── PERSISTENCE ──
+  function save() {
+    localStorage.setItem('cinescope_movies', JSON.stringify(movies));
+    localStorage.setItem('cinescope_counter', idCounter);
+  }
+  function saveWL() {
+    localStorage.setItem('cinescope_wl_' + currentUser, JSON.stringify(watchlist));
+  }
+  function load() {
+    const m = localStorage.getItem('cinescope_movies');
+    const c = localStorage.getItem('cinescope_counter');
+    if (m) { movies = JSON.parse(m); idCounter = parseInt(c) || movies.length + 1; }
+    else seed();
+  }
+  function loadWL() {
+    const w = localStorage.getItem('cinescope_wl_' + currentUser);
+    watchlist = w ? JSON.parse(w) : [];
+  }
+
+  // ── AUTH ──
+  function doLogin() {
+    const val = document.getElementById('username-input').value.trim().toLowerCase();
+    if (!val) { showToast('Please enter a username.'); return; }
+    currentUser = val;
+    load();
+    loadWL();
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('header-user').textContent = currentUser;
+    document.getElementById('avatar-initials').textContent = currentUser[0].toUpperCase();
+    updateStats();
+    renderAll();
+    renderMine();
+    renderWatchlist();
+  }
+  document.getElementById('username-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  function logout() {
+    currentUser = '';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('username-input').value = '';
+    showSection('all', document.querySelector('nav button'));
+  }
+
+  // ── NAVIGATION ──
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('s-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (id === 'mine') renderMine();
+    if (id === 'watchlist') renderWatchlist();
+    if (id === 'recommend') { document.getElementById('rec-results').innerHTML = ''; document.querySelectorAll('.genre-tile').forEach(t => t.classList.remove('selected')); }
+  }
+
+  // ── STATS ──
+  function updateStats() {
+    document.getElementById('stat-total').textContent = movies.length;
+    document.getElementById('stat-mine').textContent = movies.filter(m => m.addedBy === currentUser).length;
+    document.getElementById('stat-wl').textContent = watchlist.length;
+  }
+
+  // ── RENDER CARDS ──
+  function stars(r) {
+    return [1,2,3,4,5].map(i => `<span class="star ${i <= r ? 'filled' : ''}">★</span>`).join('');
+  }
+
+  function cardHTML(m, showWLBtn = true) {
+    const inWL = watchlist.includes(m.name);
+    return `
+      <div class="movie-card" id="card-${m.id}">
+        <div class="card-genre">${GENRE_ICONS[m.genre] || '🎬'} ${m.genre}</div>
+        <div class="card-title">${m.name}</div>
+        <div class="card-meta">
+          ${m.year ? `<span>📅 ${m.year}</span>` : ''}
+          ${m.language ? `<span>🌐 ${m.language}</span>` : ''}
+        </div>
+        <div class="card-stars">${stars(m.rating)}</div>
+        ${m.remark ? `<div class="card-remark">${m.remark}</div>` : ''}
+        <div class="card-footer">
+          <div class="card-user">by <span>${m.addedBy}</span></div>
+          ${showWLBtn
+            ? (inWL
+                ? `<span class="watchlist-badge">✓ In Watchlist</span>`
+                : `<button class="btn btn-ghost" style="padding:0.3rem 0.8rem;font-size:0.72rem;" onclick="addToWatchlist('${m.name}', ${m.id})">+ Watchlist</button>`)
+            : ''}
+        </div>
+      </div>`;
+  }
+
+  // ── ALL MOVIES ──
+  let currentFilter = 'all';
+  function renderAll(filter) {
+    if (filter !== undefined) currentFilter = filter;
+    const filtered = currentFilter === 'all' ? movies : movies.filter(m => m.genre === currentFilter);
+    const grid = document.getElementById('all-movies-grid');
+    document.getElementById('all-count').textContent = filtered.length;
+    grid.innerHTML = filtered.length
+      ? filtered.map(m => cardHTML(m)).join('')
+      : `<div class="empty"><div class="empty-icon">🎬</div><p>No movies here yet.<br>Add one!</p></div>`;
+  }
+
+  function filterMovies(genre, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAll(genre);
+  }
+
+  // ── MY MOVIES ──
+  function renderMine() {
+    const mine = movies.filter(m => m.addedBy === currentUser);
+    const grid = document.getElementById('my-movies-grid');
+    document.getElementById('mine-count').textContent = mine.length;
+    grid.innerHTML = mine.length
+      ? mine.map(m => cardHTML(m)).join('')
+      : `<div class="empty"><div class="empty-icon">🎥</div><p>You haven't added any movies yet.</p></div>`;
+  }
+
+  // ── WATCHLIST ──
+  function renderWatchlist() {
+    const c = document.getElementById('watchlist-container');
+    document.getElementById('wl-count').textContent = watchlist.length;
+    if (!watchlist.length) {
+      c.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>Your watchlist is empty.<br>Add movies from the All Movies tab.</p></div>`;
+      return;
+    }
+    c.innerHTML = watchlist.map((title, i) => `
+      <div class="watchlist-item">
+        <div class="wl-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="wl-title">${title}</div>
+        <button class="wl-remove" onclick="removeFromWatchlist(${i})" title="Remove">✕</button>
+      </div>`).join('');
+  }
+
+  function addToWatchlist(name, cardId) {
+    if (watchlist.includes(name)) { showToast('Already in watchlist!'); return; }
+    watchlist.push(name);
+    saveWL();
+    updateStats();
+    renderAll(currentFilter);
+    showToast(`"${name}" added to watchlist ✓`);
+  }
+
+  function removeFromWatchlist(idx) {
+    watchlist.splice(idx, 1);
+    saveWL();
+    updateStats();
+    renderWatchlist();
+    renderAll(currentFilter);
+    showToast('Removed from watchlist.');
+  }
+
+  // ── RECOMMENDATIONS ──
+  function getRecommendations(genre, tile) {
+    document.querySelectorAll('.genre-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    const results = movies.filter(m => m.genre === genre);
+    const container = document.getElementById('rec-results');
+    if (!results.length) {
+      container.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><p>No ${genre} movies found yet.<br>Be the first to add one!</p></div>`;
+      return;
+    }
+    const sorted = [...results].sort((a,b) => b.rating - a.rating);
+    container.innerHTML = `<div style="margin-bottom:1rem;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;">Top ${genre} Picks</div>
+      <div class="movies-grid">${sorted.map(m => cardHTML(m)).join('')}</div>`;
+  }
+
+  // ── ADD MOVIE ──
+  function addMovie() {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { showToast('Movie name is required!'); return; }
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+    const movie = {
+      id: idCounter++,
+      name,
+      year: document.getElementById('f-year').value.trim(),
+      language: document.getElementById('f-lang').value.trim(),
+      remark: document.getElementById('f-remark').value.trim(),
+      rating: ratingEl ? parseInt(ratingEl.value) : 3,
+      genre: document.getElementById('f-genre').value,
+      addedBy: currentUser
+    };
+    movies.push(movie);
+    save();
+    updateStats();
+    renderAll(currentFilter);
+    clearForm();
+    showToast(`"${name}" added successfully! 🎬`);
+    showSection('all', document.querySelectorAll('nav button')[0]);
+  }
+
+  function clearForm() {
+    ['f-name','f-year','f-lang','f-remark'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-genre').value = 'Action';
+    document.getElementById('s3').checked = true;
+  }
+
+  // ── TOAST ──
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>

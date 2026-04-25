@@ -1,0 +1,763 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0c;--bg2:#111116;--bg3:#18181f;--bg4:#22222c;--bg5:#2c2c38;
+  --text:#eeeef5;--text2:#9898b0;--text3:#55556a;
+  --gold:#f0b429;--gold-dim:#7a5a10;
+  --purple:#7c5cbf;--purple-dim:#2e2050;--purple-mid:#4a3880;
+  --border:#252530;--border2:#35354a;
+}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;width:100%}
+
+#layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;width:100%}
+
+#sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.sidebar-logo .name{font-size:22px;font-weight:500;color:var(--text);letter-spacing:-0.5px}
+.sidebar-logo .name span{color:var(--gold)}
+.sidebar-logo .sub{font-size:11px;color:var(--text3);margin-top:2px}
+.nav{padding:16px 12px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--text2);margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left;transition:all 0.12s}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.6}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--purple-dim);color:var(--text);border:0.5px solid var(--purple-mid)}
+.nav-item.active svg{opacity:1}
+.sidebar-stats{padding:16px;border-top:1px solid var(--border);margin-top:auto}
+.mini-stat{font-size:11px;color:var(--text3);margin-bottom:6px}
+.mini-stat strong{color:var(--text2);font-weight:500}
+
+#main{background:var(--bg);overflow:auto}
+.main-header{padding:28px 32px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.page-title{font-size:26px;font-weight:500;color:var(--text)}
+.page-sub{font-size:13px;color:var(--text3);margin-top:3px}
+.add-movie-btn{padding:10px 18px;background:var(--purple-dim);border:1px solid var(--purple);border-radius:9px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity 0.15s}
+.add-movie-btn:hover{opacity:0.85}
+
+.content{padding:20px 32px 40px}
+
+.add-form-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fl{font-size:11px;color:var(--text3);margin-bottom:5px}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px}
+.fi::placeholder{color:var(--text3)}
+.fi-ta{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;resize:vertical;min-height:64px}
+.fi-ta::placeholder{color:var(--text3)}
+.star-row{display:flex;gap:4px;margin-top:5px}
+.star-btn{font-size:20px;background:none;border:none;cursor:pointer;color:var(--text3);padding:0;line-height:1;transition:color 0.1s}
+.star-btn.lit{color:var(--gold)}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.btn-save{padding:9px 22px;background:var(--purple-dim);border:1px solid var(--purple);border-radius:8px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer}
+.btn-cancel{padding:9px 16px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:13px;cursor:pointer}
+
+.controls{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.search-box{flex:1;min-width:180px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:9px 14px;color:var(--text);font-size:13px}
+.search-box::placeholder{color:var(--text3)}
+.ctrl-select{background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;cursor:pointer}
+.sort-pills{display:flex;gap:4px;flex-wrap:wrap}
+.pill{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text3);transition:all 0.12s}
+.pill.active{background:var(--purple-dim);border-color:var(--purple);color:var(--text)}
+
+.section-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+.rec-banner{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:16px 20px;margin-bottom:20px}
+.rec-banner-title{font-size:13px;font-weight:500;color:var(--purple);margin-bottom:4px}
+.rec-banner-sub{font-size:12px;color:var(--text3);margin-bottom:14px}
+.rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+
+.movie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.movie-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 14px 12px;position:relative;transition:border-color 0.15s}
+.movie-card:hover{border-color:var(--border2)}
+.movie-card.watchlisted{border-color:var(--purple-mid)}
+.movie-card.rec-card{background:var(--bg3);border:1px dashed var(--border2)}
+
+.del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;opacity:0;transition:opacity 0.12s;line-height:1;padding:2px 4px}
+.movie-card:hover .del-btn{opacity:1}
+.del-btn:hover{color:#c94040}
+
+.genre-badge{font-size:10px;color:var(--purple);background:var(--purple-dim);padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:7px;font-weight:500}
+.rec-badge{font-size:10px;color:#3a9e6a;background:#0f2d1e;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:7px;font-weight:500}
+.card-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.3;margin-bottom:2px}
+.card-year{font-size:11px;color:var(--text3);margin-bottom:7px}
+.card-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-footer{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.stars-inline{display:flex;gap:1px}
+.s{font-size:13px;cursor:pointer;color:var(--text3);background:none;border:none;padding:0;transition:color 0.1s;line-height:1}
+.s.lit{color:var(--gold)}
+.wl-btn{font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text3);transition:all 0.12s;white-space:nowrap}
+.wl-btn.on{background:var(--purple-dim);border-color:var(--purple-mid);color:var(--text)}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state strong{display:block;font-size:16px;color:var(--text2);margin-bottom:8px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.stat-val{font-size:30px;font-weight:500;color:var(--text)}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:4px}
+
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.chart-title{font-size:12px;color:var(--text3);margin-bottom:14px;font-weight:500}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:12px;color:var(--text2);width:90px;flex-shrink:0}
+.bar-bg{flex:1;height:9px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--purple);transition:width 0.5s}
+.bar-num{font-size:11px;color:var(--text3);width:18px;text-align:right}
+
+.screen{display:none}.screen.active{display:block}
+
+#login-screen {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.login-box {
+  background: #1a1a1f;
+  padding: 30px;
+  border-radius: 12px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-box input,
+.login-box select,
+.login-box button {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+</style>
+
+
+<div id="login-screen">
+  <div class="login-box">
+    <h2>Login</h2>
+
+    <input id="username" placeholder="Enter username (e.g. Pooja)" />
+
+    <button onclick="loginUser()">Login</button>
+  </div>
+</div></div><div id="app" style="display:none;">
+<div id="layout">
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="name">cine<span>scope</span></div>
+      <div class="sub">Smart movie tracker</div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" onclick="switchTab('browse')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Browse
+      </button>
+      <button class="nav-item" onclick="switchTab('recommend')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"/></svg>
+        Recommendations
+      </button>
+      <button class="nav-item" onclick="switchTab('watchlist')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v11l-6-3-6 3V3a1 1 0 011-1z"/></svg>
+        Watchlist
+      </button>
+      <button class="nav-item" onclick="switchTab('stats')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="9" width="3" height="6"/><rect x="6" y="5" width="3" height="10"/><rect x="11" y="2" width="3" height="13"/></svg>
+        Stats
+      </button>
+      <button class="nav-item" onclick="switchTab('all')">
+  	<svg viewBox="0 0 16 16" fill="currentColor">
+    		<circle cx="8" cy="8" r="7"/>
+  	</svg>
+  	All Movies
+	</button>
+    </nav>
+    <div class="sidebar-stats" id="sidebar-stats"></div>
+  </div>
+
+  <div id="main">
+	<div id="screen-all" class="screen">
+  <div class="main-header">
+    <div>
+      <div class="page-title">All Movies</div>
+      <div class="page-sub">Browse full movie database</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="controls">
+      <input class="search-box" id="all-search" placeholder="Search movies..." oninput="renderAllMovies()">
+
+      <select class="ctrl-select" id="all-genre" onchange="renderAllMovies()">
+        <option value="">All genres</option>
+        <option>Sci-Fi</option><option>Drama</option><option>Action</option>
+        <option>Horror</option><option>Comedy</option><option>Thriller</option>
+        <option>Romance</option><option>Animation</option><option>Documentary</option>
+        <option>Fantasy</option>
+      </select>
+    </div>
+
+    <div id="all-grid" class="movie-grid"></div>
+  </div>
+</div>
+    <div id="screen-browse" class="screen active">
+      <div class="main-header">
+        <div>
+          <div class="page-title">My Collection</div>
+          <div class="page-sub">All your saved movies</div>
+        </div>
+        <button class="add-movie-btn" onclick="toggleForm()">+ Add movie</button>
+      </div>
+      <div class="content">
+        <div id="add-form" style="display:none">
+          <div class="add-form-wrap">
+            <div class="form-grid">
+              <div><div class="fl">Title</div><input class="fi" id="f-title" placeholder="e.g. Interstellar"></div>
+              <div><div class="fl">Year</div><input class="fi" id="f-year" placeholder="2014" maxlength="4"></div>
+              <div><div class="fl">Genre</div><select class="fi" id="f-genre">
+                <option>Sci-Fi</option><option>Drama</option><option>Action</option><option>Horror</option>
+                <option>Comedy</option><option>Thriller</option><option>Romance</option>
+                <option>Animation</option><option>Documentary</option><option>Fantasy</option>
+              </select></div>
+            </div>
+            <div class="form-grid-2">
+              <div><div class="fl">Description</div><textarea class="fi-ta" id="f-desc" placeholder="Synopsis or your thoughts..."></textarea></div>
+              <div><div class="fl">Your rating</div><div class="star-row" id="f-stars">
+                <button class="star-btn" onclick="setRating(1)">★</button>
+                <button class="star-btn" onclick="setRating(2)">★</button>
+                <button class="star-btn" onclick="setRating(3)">★</button>
+                <button class="star-btn" onclick="setRating(4)">★</button>
+                <button class="star-btn" onclick="setRating(5)">★</button>
+              </div></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-cancel" onclick="toggleForm()">Cancel</button>
+              <button class="btn-save" onclick="saveMovie()">Save movie</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <input class="search-box" id="search-input" placeholder="Search title or description..." oninput="renderBrowse()">
+          <select class="ctrl-select" id="genre-filter" onchange="renderBrowse()">
+            <option value="">All genres</option>
+            <option>Sci-Fi</option><option>Drama</option><option>Action</option><option>Horror</option>
+            <option>Comedy</option><option>Thriller</option><option>Romance</option>
+            <option>Animation</option><option>Documentary</option><option>Fantasy</option>
+          </select>
+          <div class="sort-pills">
+            <button class="pill active" data-sort="added" onclick="setSort(this)">Recent</button>
+            <button class="pill" data-sort="rating" onclick="setSort(this)">Top rated</button>
+            <button class="pill" data-sort="year" onclick="setSort(this)">Newest</button>
+            <button class="pill" data-sort="title" onclick="setSort(this)">A–Z</button>
+          </div>
+        </div>
+
+        <div id="browse-grid" class="movie-grid"></div>
+      </div>
+    </div>
+
+    <div id="screen-recommend" class="screen">
+      <div class="main-header">
+        <div>
+          <div class="page-title">Recommendations</div>
+          <div class="page-sub">Based on what you watch and rate highly</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="controls">
+          <select class="ctrl-select" id="rec-genre-filter" onchange="renderRecommend()">
+            <option value="">All genres (auto)</option>
+            <option>Sci-Fi</option><option>Drama</option><option>Action</option><option>Horror</option>
+            <option>Comedy</option><option>Thriller</option><option>Romance</option>
+            <option>Animation</option><option>Documentary</option><option>Fantasy</option>
+          </select>
+        </div>
+        <div id="rec-content"></div>
+      </div>
+    </div>
+
+    <div id="screen-watchlist" class="screen">
+      <div class="main-header">
+        <div>
+          <div class="page-title">Watchlist</div>
+          <div class="page-sub">Movies you want to see</div>
+        </div>
+      </div>
+      <div class="content">
+        <div id="wl-grid" class="movie-grid"></div>
+      </div>
+    </div>
+
+    <div id="screen-stats" class="screen">
+      <div class="main-header">
+        <div>
+          <div class="page-title">Your Stats</div>
+          <div class="page-sub">A look at your collection</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="stats-grid" id="stat-cards"></div>
+        <div class="chart-card" id="genre-chart"></div>
+        <div id="top-rated-wrap"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+<script>
+
+
+const USER_KEY = "cine_users";
+
+function getUserData() {
+  let data = JSON.parse(localStorage.getItem(USER_KEY));
+
+  if (!data) {
+    data = {
+      users: ["Pooja", "Tanisha", "Devanandha"],
+      currentUser: null,
+      userData: {}
+    };
+    localStorage.setItem(USER_KEY, JSON.stringify(data));
+  }
+
+  return data;
+}
+
+function saveUserData(data) {
+  localStorage.setItem(USER_KEY, JSON.stringify(data));
+}
+
+class Movie {
+  constructor(id,title,genre,desc,year,rating){
+    this.id=id; this.title=title; this.genre=genre;
+    this.description=desc; this.year=parseInt(year)||0;
+    this.rating=rating; this.inWatchlist=false; this.addedAt=Date.now();
+  }
+  toggleWatchlist(){this.inWatchlist=!this.inWatchlist;}
+  setRating(r){this.rating=r;}
+}
+
+class RecommendationEngine {
+  constructor(collection){this.col=collection;}
+  getFavoriteGenres(){
+    const scores={};
+    this.col.movies.forEach(m=>{
+      if(!scores[m.genre])scores[m.genre]=0;
+      scores[m.genre]+=(m.rating||3);
+    });
+    return Object.entries(scores).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  }
+  getTopGenre(){const fg=this.getFavoriteGenres();return fg[0]||null;}
+  recommendForGenre(genre){
+    const pool=MOVIE_DATABASE.filter(r=>r.genre===genre);
+    const owned=new Set(this.col.movies.map(m=>m.title.toLowerCase()));
+    return pool.filter(r=>!owned.has(r.title.toLowerCase())).slice(0,8);
+  }
+  getSmartRecommendations(){
+    const genres=this.getFavoriteGenres().slice(0,3);
+    const owned=new Set(this.col.movies.map(m=>m.title.toLowerCase()));
+    const results=[];
+    genres.forEach(g=>{
+      MOVIE_DATABASE.filter(r=>r.genre===g&&!owned.has(r.title.toLowerCase()))
+        .slice(0,4).forEach(r=>results.push({...r,matchGenre:g}));
+    });
+    return results;
+  }
+}
+
+class MovieCollection {
+  constructor(){this.movies=[];this.nextId=1;}
+  add(m){this.movies.push(m);this.persist();}
+  remove(id){this.movies=this.movies.filter(m=>m.id!==id);this.persist();}
+  search(q,genre){
+    return this.movies.filter(m=>{
+      const mq=!q||m.title.toLowerCase().includes(q.toLowerCase())||m.description.toLowerCase().includes(q.toLowerCase());
+      const mg=!genre||m.genre===genre;
+      return mq&&mg;
+    });
+  }
+  sortMovies(mode,arr){
+    const a=[...arr];
+    if(mode==='rating')return a.sort((x,y)=>y.rating-x.rating);
+    if(mode==='year')return a.sort((x,y)=>y.year-x.year);
+    if(mode==='title')return a.sort((x,y)=>x.title.localeCompare(y.title));
+    return a.sort((x,y)=>y.addedAt-x.addedAt);
+  }
+  getWatchlist(){return this.movies.filter(m=>m.inWatchlist);}
+  avgRating(){const r=this.movies.filter(m=>m.rating>0);return r.length?r.reduce((s,m)=>s+m.rating,0)/r.length:0;}
+  genreCounts(){const c={};this.movies.forEach(m=>{c[m.genre]=(c[m.genre]||0)+1;});return Object.entries(c).sort((a,b)=>b[1]-a[1]);}
+  persist(){localStorage.setItem('cinescope_v2',JSON.stringify({movies:this.movies,nextId:this.nextId}));}
+  load(){
+    try{
+      const raw=localStorage.getItem('cinescope_v2');
+      if(!raw)return this.seed();
+      const data=JSON.parse(raw);
+      this.nextId=data.nextId||1;
+      this.movies=data.movies.map(d=>{const m=new Movie(d.id,d.title,d.genre,d.description,d.year,d.rating);m.inWatchlist=d.inWatchlist||false;m.addedAt=d.addedAt||Date.now();return m;});
+    }catch(e){this.seed();}
+  }
+  seed(){
+    [['Interstellar','Sci-Fi','A team travels through a wormhole searching for a new home for humanity.',2014,5],
+     ['The Dark Knight','Action','Batman faces the Joker in a battle for the soul of Gotham.',2008,5],
+     ['Parasite','Drama','A poor family schemes to become employed by a wealthy household.',2019,5],
+     ['Get Out','Horror','A young man discovers disturbing secrets at his girlfriend\'s family estate.',2017,4],
+     ['Everything Everywhere All at Once','Sci-Fi','A laundromat owner discovers she can access skills from parallel universes.',2022,5],
+    ].forEach(d=>{const m=new Movie(this.nextId++,...d);this.movies.push(m);});
+    this.persist();
+  }
+  newId(){return this.nextId++;}
+}
+
+const MOVIE_DATABASE=[
+  {title:'Arrival',genre:'Sci-Fi',year:2016,description:'A linguist works to communicate with alien lifeforms after their arrival on Earth.'},
+  {title:'Blade Runner 2049',genre:'Sci-Fi',year:2017,description:'A young blade runner discovers a long-buried secret that could plunge society into chaos.'},
+  {title:'Annihilation',genre:'Sci-Fi',year:2018,description:'A biologist signs up for a dangerous, secret expedition where the rules of nature do not apply.'},
+  {title:'Ex Machina',genre:'Sci-Fi',year:2014,description:'A programmer is invited to administer the Turing test to an AI with a humanoid robot.'},
+  {title:'Dune',genre:'Sci-Fi',year:2021,description:'A noble family becomes embroiled in a war for control over the galaxy\'s most valuable asset.'},
+  {title:'The Shawshank Redemption',genre:'Drama',year:1994,description:'Two imprisoned men bond over years finding solace and eventual redemption through acts of decency.'},
+  {title:'Whiplash',genre:'Drama',year:2014,description:'A young drummer\'s ambitions are tested by a ruthless music conservatory instructor.'},
+  {title:'Marriage Story',genre:'Drama',year:2019,description:'A stage director and an actress struggle through a difficult, coast-to-coast divorce.'},
+  {title:'1917',genre:'Drama',year:2019,description:'Two British soldiers are sent on a mission to deliver a message that could save 1,600 men.'},
+  {title:'The Power of the Dog',genre:'Drama',year:2021,description:'A domineering rancher schemes against his brother\'s new wife and her son.'},
+  {title:'Mad Max: Fury Road',genre:'Action',year:2015,description:'In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler.'},
+  {title:'John Wick',genre:'Action',year:2014,description:'An ex-hitman comes out of retirement to track down the gangsters who killed his dog.'},
+  {title:'Mission Impossible: Fallout',genre:'Action',year:2018,description:'Ethan Hunt races against time after a mission gone wrong.'},
+  {title:'Top Gun: Maverick',genre:'Action',year:2022,description:'Maverick trains Top Gun graduates for a dangerous mission.'},
+  {title:'The Witch',genre:'Horror',year:2015,description:'A Puritan family encounters forces of evil in the woods beyond their New England farm.'},
+  {title:'Hereditary',genre:'Horror',year:2018,description:'A grieving family is haunted by a sinister presence after the death of their secretive grandmother.'},
+  {title:'Midsommar',genre:'Horror',year:2019,description:'A couple travel to Sweden to visit a rural hometown\'s midsummer festival.'},
+  {title:'A Quiet Place',genre:'Horror',year:2018,description:'A family struggles to survive in a post-apocalyptic world inhabited by blind monsters.'},
+  {title:'The Grand Budapest Hotel',genre:'Comedy',year:2014,description:'The adventures of a legendary hotel concierge and his protégé.'},
+  {title:'Knives Out',genre:'Comedy',year:2019,description:'A detective investigates the death of a crime novelist at his estate.'},
+  {title:'The Favourite',genre:'Comedy',year:2018,description:'In the 18th century, a frail Queen Anne occupies the throne while two cousins compete for her affection.'},
+  {title:'Parasite',genre:'Thriller',year:2019,description:'Greed and class discrimination threaten two families.'},
+  {title:'Gone Girl',genre:'Thriller',year:2014,description:'On the morning of his fifth wedding anniversary a man\'s wife disappears.'},
+  {title:'Prisoners',genre:'Thriller',year:2013,description:'When two girls disappear, a father takes matters into his own hands.'},
+  {title:'Zodiac',genre:'Thriller',year:2007,description:'A political cartoonist becomes obsessed with tracking down the Zodiac Killer.'},
+  {title:'Portrait of a Lady on Fire',genre:'Romance',year:2019,description:'On an isolated island, a painter falls in love with the subject of her portrait.'},
+  {title:'Normal People',genre:'Romance',year:2020,description:'Two young people navigate love and connection from school to college.'},
+  {title:'Call Me By Your Name',genre:'Romance',year:2017,description:'In 1980s Italy, romance blooms between a seventeen-year-old student and a summer guest.'},
+  {title:'Spider-Man: Into the Spider-Verse',genre:'Animation',year:2018,description:'Miles Morales becomes the Spider-Man of his reality and crosses paths with his counterparts.'},
+  {title:'Soul',genre:'Animation',year:2020,description:'A musician who has lost his passion for music is transported out of his body.'},
+  {title:'Wolfwalkers',genre:'Animation',year:2020,description:'In a time of superstition, a young apprentice hunter discovers a secret tribe of wolfwalkers.'},
+  {title:'Free Solo',genre:'Documentary',year:2018,description:'Alex Honnold attempts to free solo climb Yosemite\'s El Capitan.'},
+  {title:'13th',genre:'Documentary',year:2016,description:'An in-depth look at the prison system in the United States and how it reveals the nation\'s history of racial inequality.'},
+  {title:'My Octopus Teacher',genre:'Documentary',year:2020,description:'A filmmaker forges an unexpected relationship with an octopus in a South African kelp forest.'},
+  {title:'Pan\'s Labyrinth',genre:'Fantasy',year:2006,description:'In post-Civil War Spain, a girl escapes into an eerie but captivating fantasy world.'},
+  {title:'The Shape of Water',genre:'Fantasy',year:2017,description:'A mute woman forms a unique relationship with an amphibious creature.'},
+  {title:'Princess Mononoke',genre:'Fantasy',year:1997,description:'A prince becomes embroiled in a struggle between forest gods and humans who consume the forest\'s resources.'},
+];
+
+const db=new MovieCollection();
+db.load();
+const engine=new RecommendationEngine(db);
+
+let currentSort='added',currentRating=0,showForm=false;
+
+function switchTab(t){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`.nav-item[onclick="switchTab('${t}')"]`).classList.add('active');
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById('screen-'+t).classList.add('active');
+  if(t==='recommend')renderRecommend();
+  if(t==='watchlist')renderWatchlist();
+  if(t==='stats')renderStats();
+  if(t==='all') renderAllMovies();
+  if(t === 'browse') renderBrowse();
+  updateSidebarStats();
+}
+
+function loadUsers() {
+  const data = getUserData();
+  const select = document.getElementById("user-select");
+
+  select.innerHTML = data.users
+    .map(u => `<option value="${u}">${u}</option>`)
+    .join("");
+}
+
+function addUser() {
+  const name = document.getElementById("new-user").value.trim();
+  if (!name) return alert("Enter name");
+
+  const data = getUserData();
+
+  if (data.users.includes(name)) {
+    alert("User already exists");
+    return;
+  }
+
+  data.users.push(name);
+  data.userData[name] = { movies: [] };
+
+  saveUserData(data);
+  loadUsers();
+}
+
+function loginUser() {
+  const name = document.getElementById("username").value.trim();
+
+  if (!name) {
+    alert("Enter a username");
+    return;
+  }
+
+  const data = getUserData();
+
+  // if user doesn't exist → create automatically
+  if (!data.users.includes(name)) {
+    data.users.push(name);
+    data.userData[name] = { movies: [] };
+  }
+
+  data.currentUser = name;
+  saveUserData(data);
+
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  loadUserMovies();
+
+  // show user in header
+  document.querySelectorAll(".page-sub").forEach(el => {
+    const base = el.innerText.split("|")[0].trim();
+    el.innerText = base + " | User: " + name;
+  });
+}
+
+function loadUserMovies() {
+  const data = getUserData();
+  const user = data.currentUser;
+
+  db.movies = data.userData[user]?.movies || [];
+  renderBrowse();
+}
+
+MovieCollection.prototype.persist = function() {
+  const data = getUserData();
+  const user = data.currentUser;
+
+  data.userData[user] = {
+    movies: this.movies
+  };
+
+  saveUserData(data);
+};
+
+function toggleForm(){
+  showForm=!showForm;
+  document.getElementById('add-form').style.display=showForm?'block':'none';
+  if(showForm){setRating(0);document.getElementById('f-title').value='';document.getElementById('f-desc').value='';document.getElementById('f-year').value='';}
+}
+
+function setRating(n){
+  currentRating=n;
+  document.querySelectorAll('#f-stars .star-btn').forEach((b,i)=>b.classList.toggle('lit',i<n));
+}
+
+function setSort(el){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  currentSort=el.dataset.sort;
+  renderBrowse();
+}
+
+function saveMovie(){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){alert('Please enter a title.');return;}
+  const m=new Movie(db.newId(),title,document.getElementById('f-genre').value,document.getElementById('f-desc').value.trim(),document.getElementById('f-year').value,currentRating);
+  db.add(m);
+  toggleForm();
+  renderBrowse();
+  updateSidebarStats();
+}
+
+function toggleWatchlist(id){
+  const m=db.movies.find(x=>x.id===id);
+  if(m){m.toggleWatchlist();db.persist();renderBrowse();if(document.getElementById('screen-watchlist').classList.contains('active'))renderWatchlist();}
+  updateSidebarStats();
+}
+
+function rateMovie(id,r){
+  const m=db.movies.find(x=>x.id===id);
+  if(m){m.setRating(r);db.persist();renderBrowse();}
+}
+
+function deleteMovie(id){
+  db.remove(id);
+  renderBrowse();
+  updateSidebarStats();
+}
+
+function addFromRec(rec){
+  const m=new Movie(db.newId(),rec.title,rec.genre,rec.description,rec.year,0);
+  db.add(m);
+  renderRecommend();
+  updateSidebarStats();
+}
+
+function makeCard(m,extra){
+  const stars=[1,2,3,4,5].map(i=>`<button class="s${i<=m.rating?' lit':''}" onclick="rateMovie(${m.id},${i})">★</button>`).join('');
+  return `<div class="movie-card${m.inWatchlist?' watchlisted':''}${extra||''}">
+    <button class="del-btn" onclick="deleteMovie(${m.id})">✕</button>
+    <span class="genre-badge">${m.genre}</span>
+    <div class="card-title">${m.title}</div>
+    <div class="card-year">${m.year||'—'}</div>
+    <div class="card-desc">${m.description||'<em style="color:var(--text3)">No description</em>'}</div>
+    <div class="card-footer">
+      <div class="stars-inline">${stars}</div>
+      <button class="wl-btn${m.inWatchlist?' on':''}" onclick="toggleWatchlist(${m.id})">${m.inWatchlist?'✓ Saved':'+ List'}</button>
+    </div>
+  </div>`;
+}
+
+function makeRecCard(rec){
+  return `<div class="movie-card rec-card">
+    <span class="rec-badge">Recommended</span>
+    <div class="card-title">${rec.title}</div>
+    <div class="card-year">${rec.year||'—'}</div>
+    <div class="card-desc">${rec.description||''}</div>
+    <div class="card-footer">
+      <span style="font-size:11px;color:var(--text3)">${rec.genre}</span>
+      <button class="wl-btn" onclick='addFromRec(${JSON.stringify(rec).replace(/'/g,"\\'")})'  style="color:#3a9e6a;border-color:#1a4a2a">+ Add</button>
+    </div>
+  </div>`;
+}
+
+function renderBrowse(){
+  const q=document.getElementById('search-input').value;
+  const genre=document.getElementById('genre-filter').value;
+  let res=db.search(q,genre);
+  res=db.sortMovies(currentSort,res);
+  const grid=document.getElementById('browse-grid');
+  if(!res.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text3);font-size:14px">No movies found. Try a different filter.</div>';return;}
+  grid.innerHTML=res.map(m=>makeCard(m)).join('');
+}
+
+function renderRecommend(){
+  const filterGenre=document.getElementById('rec-genre-filter').value;
+  const el=document.getElementById('rec-content');
+  if(db.movies.length===0){el.innerHTML='<div class="empty-state"><strong>Nothing to go on yet</strong>Add and rate some movies first — we\'ll recommend based on your taste.</div>';return;}
+
+  let html='';
+
+  if(filterGenre){
+    const recs=engine.recommendForGenre(filterGenre);
+    const myInGenre=db.movies.filter(m=>m.genre===filterGenre);
+    if(myInGenre.length>0){
+      html+=`<div class="rec-banner" style="margin-bottom:20px"><div class="rec-banner-title">Because you watched ${myInGenre.map(m=>m.title).slice(0,2).join(', ')}...</div><div class="rec-banner-sub">More ${filterGenre} films you might enjoy</div></div>`;
+    }
+    if(recs.length===0){html+='<div style="text-align:center;padding:40px;color:var(--text3);font-size:14px">No more recommendations in this genre — you\'ve seen them all!</div>';}
+    else{html+=`<div class="movie-grid">${recs.map(r=>makeRecCard(r)).join('')}</div>`;}
+  } else {
+    const favGenres=engine.getFavoriteGenres().slice(0,3);
+    favGenres.forEach(genre=>{
+      const recs=engine.recommendForGenre(genre).slice(0,4);
+      if(recs.length===0)return;
+      const myInGenre=db.movies.filter(m=>m.genre===genre).sort((a,b)=>b.rating-a.rating);
+      const topMovie=myInGenre[0];
+      html+=`<div style="margin-bottom:28px">
+        <div class="section-label">${genre}</div>`;
+      if(topMovie){html+=`<div class="rec-banner"><div class="rec-banner-title">Based on your love of ${topMovie.title} (${topMovie.rating>0?'★'.repeat(topMovie.rating):'unrated'})</div><div class="rec-banner-sub">You have ${myInGenre.length} ${genre} movie${myInGenre.length>1?'s':''} — here\'s what to watch next</div></div>`;}
+      html+=`<div class="movie-grid">${recs.map(r=>makeRecCard(r)).join('')}</div></div>`;
+    });
+    if(!html){html='<div class="empty-state"><strong>No recommendations yet</strong>Rate your movies to unlock personalised suggestions.</div>';}
+  }
+  el.innerHTML=html;
+}
+
+function renderWatchlist(){
+  const wl=db.getWatchlist();
+  const grid=document.getElementById('wl-grid');
+  if(!wl.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><strong>Your watchlist is empty</strong>Tap "+ List" on any movie to save it here.</div>';return;}
+  grid.innerHTML=wl.map(m=>makeCard(m)).join('');
+}
+
+function renderStats(){
+  const total=db.movies.length;
+  const avg=db.avgRating().toFixed(1);
+  const wlCount=db.getWatchlist().length;
+  document.getElementById('stat-cards').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lbl">movies saved</div></div>
+    <div class="stat-card"><div class="stat-val">${avg}</div><div class="stat-lbl">avg rating</div></div>
+    <div class="stat-card"><div class="stat-val">${wlCount}</div><div class="stat-lbl">on watchlist</div></div>`;
+  const gc=db.genreCounts();
+  const max=gc[0]?gc[0][1]:1;
+  document.getElementById('genre-chart').innerHTML=`<div class="chart-title">Genre breakdown</div>`+
+    (gc.length?gc.map(([g,c])=>`<div class="bar-row"><span class="bar-label">${g}</span><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(c/max*100)}%"></div></div><span class="bar-num">${c}</span></div>`).join(''):'<div style="color:var(--text3);font-size:13px">Add some movies to see stats.</div>');
+  const top=db.sortMovies('rating',db.movies).filter(m=>m.rating>0).slice(0,5);
+  document.getElementById('top-rated-wrap').innerHTML=top.length?`<div class="chart-card"><div class="chart-title">Top rated</div>${top.map((m,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;${i<top.length-1?'border-bottom:1px solid var(--border)':''}"><span style="font-size:12px;color:var(--text3);width:18px">${i+1}</span><div style="flex:1"><div style="font-size:13px;font-weight:500">${m.title}</div><div style="font-size:11px;color:var(--text3)">${m.genre} · ${m.year||'—'}</div></div><span style="color:var(--gold);font-size:12px">${'★'.repeat(m.rating)}</span></div>`).join('')}</div>`:'';
+}
+
+function updateSidebarStats(){
+  const favGenre=engine.getTopGenre();
+  const total=db.movies.length;
+  document.getElementById('sidebar-stats').innerHTML=`
+    <div class="mini-stat"><strong>${total}</strong> movie${total!==1?'s':''} saved</div>
+    ${favGenre?`<div class="mini-stat">Fav genre: <strong>${favGenre}</strong></div>`:''}
+    <div class="mini-stat">Data stored in browser</div>`;
+}
+
+function renderAllMovies() {
+  const q = document.getElementById('all-search').value.toLowerCase();
+  const genre = document.getElementById('all-genre').value;
+
+  const combined = [
+  ...MOVIE_DATABASE,
+  ...db.movies.map(m => ({
+    title: m.title,
+    genre: m.genre,
+    year: m.year,
+    description: m.description
+  }))
+];
+
+let results = combined.filter(m => {
+  const matchSearch =
+    !q ||
+    m.title.toLowerCase().includes(q) ||
+    m.description.toLowerCase().includes(q);
+
+  const matchGenre =
+    !genre || m.genre === genre;
+
+  return matchSearch && matchGenre;
+});
+  const grid = document.getElementById('all-grid');
+
+  if (!results.length) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3)">
+        No movies found
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = results.map(m => `
+    <div class="movie-card rec-card">
+      <span class="rec-badge">${m.genre}</span>
+      <div class="card-title">${m.title}</div>
+      <div class="card-year">${m.year || '—'}</div>
+      <div class="card-desc">${m.description}</div>
+
+      <div class="card-footer">
+        <span style="font-size:11px;color:var(--text3)">Database</span>
+        <button class="wl-btn"
+          onclick='addFromRec(${JSON.stringify(m).replace(/'/g,"\\'")})'>
+          + Add
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderBrowse();
+updateSidebarStats();
+</script>
